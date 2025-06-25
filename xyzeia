@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Improvement Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="bg-indigo-600 text-white p-4 text-center text-xl font-bold">
+    Self-Improvement Dashboard
+  </header>
+
+  <div class="p-4 text-center">
+    <button onclick="signIn()" id="login-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sign in with Google</button>
+    <button onclick="signOut()" id="logout-btn" class="hidden bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">Sign Out</button>
+    <p id="user-info" class="mt-4 font-medium"></p>
+  </div>
+
+  <main id="dashboard" class="p-4 space-y-6 hidden">
+    <h2 class="text-2xl font-semibold text-center">🧠 Daily Progress Tracker</h2>
+    <ul id="task-list" class="bg-white p-4 rounded shadow space-y-2 text-left text-sm"></ul>
+  </main>
+
+  <footer class="bg-gray-200 text-center p-4 mt-8">
+    &copy; 2025 Self-Improvement Journey
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFyIkGB9CxDjZEmYT9Egvfx7aXMkxdhhI",
+      authDomain: "development-dashboard-7ee34.firebaseapp.com",
+      projectId: "development-dashboard-7ee34",
+      storageBucket: "development-dashboard-7ee34.appspot.com",
+      messagingSenderId: "883673699875",
+      appId: "1:883673699875:web:63ef2f6280b96771b20396",
+      measurementId: "G-D4Z2K7EZM6",
+      databaseURL: "https://development-dashboard-7ee34-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    let currentUser = null;
+
+    const tasks = [
+      "Typing Practice & Speed Test",
+      "Coding Fundamentals",
+      "Game Development",
+      "Language Learning",
+      "Communication & Writing Skills",
+      "Mental Math + Logical Thinking",
+      "Personal Finance",
+      "Learn Tools (Notion, Trello, Canva, Docs)",
+      "Critical Thinking",
+      "Digital Literacy",
+      "Weekly Quiz or Progress Review",
+      "Creative Practice (Story Building, Journaling)"
+    ];
+
+    function renderTasks(progress = {}) {
+      const taskList = document.getElementById("task-list");
+      taskList.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const isChecked = progress[index] || false;
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" ${isChecked ? "checked" : ""} onchange="updateTask(${index}, this.checked)" />
+            <span>${task}</span>
+          </label>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function updateTask(index, checked) {
+      if (!currentUser) return;
+      const ref = firebase.database().ref("users/" + currentUser.uid + "/progress");
+      ref.once("value", snapshot => {
+        const data = snapshot.val() || {};
+        data[index] = checked;
+        ref.set(data);
+      });
+    }
+
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider).then(result => {
+        currentUser = result.user;
+        document.getElementById("user-info").textContent = `Welcome, ${currentUser.displayName}`;
+        document.getElementById("dashboard").classList.remove("hidden");
+        document.getElementById("login-btn").classList.add("hidden");
+        document.getElementById("logout-btn").classList.remove("hidden");
+
+        const ref = firebase.database().ref("users/" + currentUser.uid + "/progress");
+        ref.once("value").then(snapshot => {
+          renderTasks(snapshot.val());
+        });
+      }).catch(error => {
+        console.error(error);
+        alert("Login failed. Please try again.");
+      });
+    }
+
+    function signOut() {
+      firebase.auth().signOut().then(() => {
+        currentUser = null;
+        document.getElementById("user-info").textContent = "";
+        document.getElementById("dashboard").classList.add("hidden");
+        document.getElementById("login-btn").classList.remove("hidden");
+        document.getElementById("logout-btn").classList.add("hidden");
+      });
+    }
+  </script>
+</body>
+</html>
