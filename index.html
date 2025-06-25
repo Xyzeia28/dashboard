@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Improvement Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="bg-indigo-600 text-white p-4 text-center text-xl font-bold">
+    Self-Improvement Dashboard
+  </header>
+
+  <div class="p-4 text-center">
+    <button onclick="signIn()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sign in with Google</button>
+    <p id="user-info" class="mt-4 font-medium"></p>
+  </div>
+
+  <main class="p-4 space-y-8">
+    <!-- Existing dashboard sections remain unchanged -->
+    <!-- ... -->
+  </main>
+
+  <footer class="bg-gray-200 text-center p-4 mt-8">
+    &copy; 2025 Self-Improvement Journey
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFyIkGB9CxDjZEmYT9Egvfx7aXMkxdhhI",
+      authDomain: "development-dashboard-7ee34.firebaseapp.com",
+      projectId: "development-dashboard-7ee34",
+      storageBucket: "development-dashboard-7ee34.firebasestorage.app",
+      messagingSenderId: "883673699875",
+      appId: "1:883673699875:web:63ef2f6280b96771b20396",
+      measurementId: "G-D4Z2K7EZM6"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    function signIn() {
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          document.getElementById("user-info").textContent = `Welcome, ${user.displayName}`;
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Login failed. Please try again.");
+        });
+    }
+  </script>
+</body>
+</html>
